@@ -100,9 +100,11 @@ public class ConvoActivity extends ActionBarActivity {
 	public void sendMessage(View v){
 		Log.i("TESt JSON Stuff",convo.getId()+" "+convo.getRev()+" "+convo.getUser1()+" "+ convo.getMostRecentMessage());
 		EditText messageET = (EditText) findViewById(R.id.newmsg);
-		String newMsg = "\""+messageET.getText().toString()+"\"";
-		putMessage(newMsg);
-		adapter.notifyDataSetChanged();
+		if(!messageET.getText().toString().equals("")){
+			String newMsg = "\""+messageET.getText().toString()+"\"";
+			putMessage(newMsg);
+			adapter.notifyDataSetChanged();
+		}
 	}
 	public class putJSONAsync extends AsyncTask<Object, Void, Void> {
 	    @Override

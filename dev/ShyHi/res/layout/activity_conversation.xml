@@ -36,6 +36,9 @@
                 android:layout_weight="10"
                 android:layout_marginLeft="10dp"
                 android:hint="Send a message"
+                android:imeOptions="actionSend"
+                android:onClick="sendMessage"
+                android:inputType="text"
                 android:id="@+id/newmsg"
                 />
 
