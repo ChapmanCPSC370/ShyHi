@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout 
+  xmlns:android="http://schemas.android.com/apk/res/android"       
+  android:layout_width="fill_parent" 
+  android:layout_height="fill_parent"
+  > 
+
+  <TextView
+      android:id="@+id/recentMsg"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentRight="true"
+      android:layout_alignParentTop="true"
+      android:layout_marginLeft="15dp"
+      android:layout_marginRight="15dp"
+      android:layout_marginTop="15dp"
+      android:background="@drawable/lightgray"
+      android:clipToPadding="true"
+      android:editable="false"
+      android:focusable="true"
+      android:gravity="left"
+      android:maxEms="15"
+      android:minEms="1"
+      android:minHeight="1dp"
+      android:minLines="0"
+      android:paddingBottom="7dp"
+      android:paddingLeft="7dp"
+      android:paddingRight="7dp"
+      android:paddingTop="7dp"
+      android:scrollHorizontally="false"
+      android:text="how bout the weather today"
+      android:textColor="#343434"
+      android:textSize="12sp" />
+
+</RelativeLayout>

@@ -73,7 +73,7 @@ public class Convo {
 	
 	public String getMostRecentMessage(){
 		if(hasMessages())
-			return messages.get(messages.size()-1).getMessage();
+			return messages.get(messages.size()-1).getMessageNoQuotes();
 		else
 			return "";
 	}

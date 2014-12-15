@@ -37,6 +37,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.TextView;
@@ -44,6 +45,14 @@ import android.widget.TextView;
 
 //helper utility class for calling rest and getting json objects
 public class RestUtils {
+	
+	//this is the dev and testing server IP
+	public static String dev_server_str = "http://104.236.22.60:5984/shyhi/";
+	public static String get_convo_view_str = "http://104.236.22.60:5984/shyhi/_design/conversation/_view/get_convo?key=";
+	public static String get_all_convo_view_str = "http://104.236.22.60:5984/shyhi/_design/conversation/_view/get_all_convo?key="; 
+	public static String get_all_user_ids = "http://104.236.22.60:5984/shyhi/_design/users/_view/getAllUserIds";
+	public static String update_all_convos_str = "http://104.236.22.60:5984/shyhi/_changes?filter=users_convo/all_convos&name=";
+	public static String update_one_convo_str = "http://104.236.22.60:5984/shyhi/_changes?filter=users_convo/one_convo&id=";
 
 	public RestUtils(){};
 	
@@ -52,7 +61,7 @@ public class RestUtils {
     	String convoStr = "";
     	Convo convo = null;
 		try {
-			convoStr = new fetchJSON().execute("http://104.236.22.60:5984/shyhi/_design/conversation/_view/get_convo?key=%22"+convoID+"%22").get();
+			convoStr = new fetchJSON().execute(get_convo_view_str+"%22"+convoID+"%22").get();
 			JsonParser jp = new JsonParser();
 			JsonElement convoJ = jp.parse(convoStr);
 			if(!convoJ.getAsJsonObject().get("rows").isJsonNull()){
@@ -77,7 +86,7 @@ public class RestUtils {
     	ArrayList<Convo> convoArr = new ArrayList<Convo>();
 		String allConvosStr = "";
 		try {
-			allConvosStr = new fetchJSON().execute("http://104.236.22.60:5984/shyhi/_design/conversation/_view/get_all_convo?key=%22"+key+"%22").get();
+			allConvosStr = new fetchJSON().execute(get_all_convo_view_str+"%22"+key+"%22").get();
 			JsonParser jp = new JsonParser();
 			JsonElement convos = jp.parse(allConvosStr);
 			JsonArray convosArr = (JsonArray) convos.getAsJsonObject().get("rows");
@@ -116,7 +125,7 @@ public class RestUtils {
 		String userRet = "";
 		ArrayList<String> allUserIDs = new ArrayList<String>();
 		try {
-			allUsers = new fetchJSON().execute("http://104.236.22.60:5984/shyhi/_design/users/_view/getAllUserIds").get();
+			allUsers = new fetchJSON().execute(get_all_user_ids).get();
 			JsonParser jp = new JsonParser();
 			JsonElement users = jp.parse(allUsers);
 			JsonArray usersArr = (JsonArray) users.getAsJsonObject().get("rows");
@@ -139,8 +148,25 @@ public class RestUtils {
 		Message msg = new Message(msgObj.get("to").toString(),msgObj.get("from").toString(),msgObj.get("timestamp").toString(),msgObj.get("message").toString());
 		return msg;
 	} 
+	 public String getUpdateJSON(String key, String update, boolean all) throws Exception{ 
+	    	HttpClient httpClient = new DefaultHttpClient();
+	        HttpResponse response;
+	        HttpGet get=new HttpGet();
+	        if(all){
+	        	if(update.isEmpty()){
+	        		update = "0";
+	        	}
+	 	        get.setURI(new URI(update_all_convos_str+key+"&since="+update));	
+	        }
+	        else{
+	        	get.setURI(new URI(update_one_convo_str+"%22"+key+"%22"));
+	        }
+	        response=httpClient.execute(get);
+	        return parseHttpResponse(response,2);          
+	     }
+	    
 	//helper method to get the JSON object
-    public String getJSON(String address){
+    public static String getJSON(String address){
     	StringBuilder builder = new StringBuilder();
     	HttpClient client = new DefaultHttpClient();
     	HttpGet httpGet = new HttpGet(address);
@@ -195,7 +221,8 @@ public class RestUtils {
         post.setHeader("Accept", "application/json");
         post.setHeader("Content-type", "application/json");
         response=httpClient.execute(post);
-        return parseHttpResponse(response, 0);          
+       
+        return parseHttpResponse(response, 2);          
      }
     
     public  String parseHttpResponse(HttpResponse response,int revID) throws Exception {
@@ -206,10 +233,11 @@ public class RestUtils {
         	if(result.has("rev"))
         		return result.getString("rev"); //return new rev  
         }
-        else{
+        else if(revID == 0){
         	return result.getString("id");
         }
-        return "";
+        //Log.i("Result", result.toString());
+        return result.toString();
         
     }
 	//helper AsyncTask class
@@ -233,5 +261,19 @@ public class RestUtils {
 	    	getRandUser(thisUser,strArr);
 	    }
 	    return randId;
+	}
+	
+	public String getCurrentConvoUpdates(String convoID){
+		return(getJSON(update_all_convos_str+convoID));
+		//should handle updating conversation, probably should actualyl return convo object
+		//should be running in the specific conversatin
+	}
+	
+	public static String getUpdates(String user_id){
+		//curl -X GET "http://104.236.22.60:5984/shyhi/_changes?feed=continuous&filter=users_convo/important&name=a02b5b9b-05a0-4c0c-b946-83e1f28ac2f6"
+		//Log.i("JSON update",getJSON(update_all_convos_str+user_id));
+		return "";
+		//should handle updating all convos in the background. Maybe not continuous but polling. Like every 30 sec or min
+		//should be always running
 	}
 }

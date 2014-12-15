@@ -1,0 +1,29 @@
+package dev.rug.shyhi;
+
+import android.app.IntentService;
+import android.content.Intent;
+import android.util.Log;
+
+public class ConvoUpdateService extends IntentService {
+
+	public ConvoUpdateService(String name) {
+		super(name);
+		Log.i("service","service");
+	}
+	/**
+	   * The IntentService calls this method from the default worker thread with
+	   * the intent that started the service. When this method returns, IntentService
+	   * stops the service, as appropriate.
+	   */
+	  @Override
+	  protected void onHandleIntent(Intent intent) {
+	              
+	            	  //RestUtils.getUpdates(Installation.getUUID());
+	            	  Log.i("Succeed","Yes");
+	              
+	            	  Log.i("Fake","Service fail");
+	              
+	          }
+	  
+	
+}

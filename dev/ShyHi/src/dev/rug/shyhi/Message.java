@@ -35,6 +35,13 @@ public class Message {
 	public String getMessage(){
 		return message;
 	}
+	public String getMessageNoQuotes(){
+		if(!message.isEmpty())
+			return message.substring(1,message.length()-1);
+		else
+			return "";
+	
+	}
 	public void setToID(String t){
 		toID = t;
 	}
@@ -44,6 +51,7 @@ public class Message {
 	public void setMessage(String msg){
 		message = msg;
 	}
+	
 	public String messageToString(){
 		String msgStr = "{\"from\": "+getFromID()+","+
 						"\"to\": "+getToID()+","+

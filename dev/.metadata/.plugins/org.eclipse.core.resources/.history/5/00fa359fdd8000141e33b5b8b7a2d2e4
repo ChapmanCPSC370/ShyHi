@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+	    <TextView
+        android:id="@+id/recentMsg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#343434"
+        android:textSize="15sp"
+        android:scrollHorizontally="false"
+        android:background="#c2c2c2"
+        android:gravity="right"
+        android:text="Oh hi, how bout the weather today" />
+	    
+</LinearLayout>

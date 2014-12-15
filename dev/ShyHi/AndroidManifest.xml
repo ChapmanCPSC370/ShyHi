@@ -44,6 +44,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="dev.rug.shyhi.HomeScreen" />
         </activity>
+        <service android:name=".ConvoUpdateService"/>
+        <service android:name=".UpdaterService"/>
+        
     </application>
 
 </manifest>

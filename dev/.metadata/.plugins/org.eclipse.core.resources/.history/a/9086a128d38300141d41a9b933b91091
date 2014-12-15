@@ -1,0 +1,277 @@
+package dev.rug.shyhi;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.security.Timestamp;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.concurrent.ExecutionException;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import android.content.res.Resources;
+import android.os.AsyncTask;
+import android.util.Log;
+import android.widget.TextView;
+
+
+//helper utility class for calling rest and getting json objects
+public class RestUtils {
+	
+	//this is the dev and testing server IP
+	public static String dev_server_str = "http://104.236.22.60:5984/shyhi/";
+	public static String get_convo_view_str = "http://104.236.22.60:5984/shyhi/_design/conversation/_view/get_convo?key=";
+	public static String get_all_convo_view_str = "http://104.236.22.60:5984/shyhi/_design/conversation/_view/get_all_convo?key="; 
+	public static String get_all_user_ids = "http://104.236.22.60:5984/shyhi/_design/users/_view/getAllUserIds";
+	public static String update_all_convos_str = "http://104.236.22.60:5984/shyhi/_changes?filter=users_convo/all_convos&name=";
+	public static String update_one_convo_str = "http://104.236.22.60:5984/shyhi/_changes?filter=users_convo/one_convo&id=";
+
+	public RestUtils(){};
+	
+	public Convo getConvoById(String convoID){
+		//String convoStr = 
+    	String convoStr = "";
+    	Convo convo = null;
+		try {
+			convoStr = new fetchJSON().execute(get_convo_view_str+"%22"+convoID+"%22").get();
+			JsonParser jp = new JsonParser();
+			JsonElement convoJ = jp.parse(convoStr);
+			if(!convoJ.getAsJsonObject().get("rows").isJsonNull()){
+				JsonArray convoRow = (JsonArray) convoJ.getAsJsonObject().get("rows");
+				JsonElement item = convoRow.get(0).getAsJsonObject();
+				JsonObject convoJSON = (JsonObject) item.getAsJsonObject().get("value");
+				convo = getConvoFromJson(convoJSON);
+			}
+			else{
+				convo = new Convo();
+			}
+			
+		}catch(Exception e){
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return convo;
+	}
+
+	//It works! 
+	public ArrayList<Convo> getAllConvos(String key){
+    	ArrayList<Convo> convoArr = new ArrayList<Convo>();
+		String allConvosStr = "";
+		try {
+			allConvosStr = new fetchJSON().execute(get_all_convo_view_str+"%22"+key+"%22").get();
+			JsonParser jp = new JsonParser();
+			JsonElement convos = jp.parse(allConvosStr);
+			JsonArray convosArr = (JsonArray) convos.getAsJsonObject().get("rows");
+			for(int i = 0; i < convosArr.size(); ++i){
+				  JsonElement item = convosArr.get(i).getAsJsonObject();
+				  JsonObject convo = (JsonObject) item.getAsJsonObject().get("value");
+				  convoArr.add(getConvoFromJson(convo));
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	//turn the allConvosStr into a java object
+    	return convoArr;
+    }
+	
+	public void updateConvo(Convo convo){
+		//send convo to couchdb and update
+	}
+	
+	public Convo getConvoFromJson(JsonObject convoObj){
+		ArrayList<Message> msgArrList = new ArrayList<Message>();
+		if(convoObj.getAsJsonObject().get("messages").isJsonArray()){
+			JsonArray msgArr = (JsonArray)convoObj.getAsJsonObject().get("messages");
+		for(int i = 0; i < msgArr.size(); ++i){
+			Message msg = getMessageFromJson(msgArr.get(i).getAsJsonObject());
+			msgArrList.add(msg);
+		}
+		}
+		Convo convo = new Convo(convoObj.get("_id").toString(),convoObj.get("_rev").toString(),convoObj.get("user1").toString(),convoObj.get("user2").toString(),msgArrList);
+		return convo;
+	}
+	
+	public String getRandomUserID(String thisUser){
+		String allUsers = "";
+		String userRet = "";
+		ArrayList<String> allUserIDs = new ArrayList<String>();
+		try {
+			allUsers = new fetchJSON().execute(get_all_user_ids).get();
+			JsonParser jp = new JsonParser();
+			JsonElement users = jp.parse(allUsers);
+			JsonArray usersArr = (JsonArray) users.getAsJsonObject().get("rows");
+			for(int i = 0; i < usersArr.size(); ++i){
+				  JsonObject item = usersArr.get(i).getAsJsonObject();
+				  allUserIDs.add(item.get("key").toString());
+			}
+			userRet = getRandUser(thisUser,allUserIDs);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return userRet;
+
+	}
+	public Message getMessageFromJson(JsonObject msgObj){
+		Message msg = new Message(msgObj.get("to").toString(),msgObj.get("from").toString(),msgObj.get("timestamp").toString(),msgObj.get("message").toString());
+		return msg;
+	} 
+	 public String getUpdateJSON(String key, String update, boolean all) throws Exception{ 
+	    	HttpClient httpClient = new DefaultHttpClient();
+	        HttpResponse response;
+	        HttpGet get=new HttpGet();
+	        if(all){
+	        	Log.i("URL get: ",update_all_convos_str+"%22"+key+"%22"+"&since="+update);
+	 	        get.setURI(new URI(update_all_convos_str+"%22"+key+"%22"));	
+	        }
+	        else{
+	        	//Log.i("URL get: ",update_one_convo_str+"%22"+key+"%22");
+	        	get.setURI(new URI(update_one_convo_str+"%22"+key+"%22"));
+	        }
+	        response=httpClient.execute(get);
+	        return parseHttpResponse(response,2);          
+	     }
+	    
+	//helper method to get the JSON object
+    public static String getJSON(String address){
+    	StringBuilder builder = new StringBuilder();
+    	HttpClient client = new DefaultHttpClient();
+    	HttpGet httpGet = new HttpGet(address);
+    	try{
+    		HttpResponse response = client.execute(httpGet);
+    		StatusLine statusLine = response.getStatusLine();
+    		int statusCode = statusLine.getStatusCode();
+    		if(statusCode == 200){
+    			HttpEntity entity = response.getEntity();
+    			InputStream content = entity.getContent();
+    			BufferedReader reader = new BufferedReader(new InputStreamReader(content));
+    			String line;
+    			while((line = reader.readLine()) != null){
+    				builder.append(line);
+    			}
+    		} else {
+    			Log.e("ShyHi","Failed to get JSON object");
+    		}
+    	}catch(ClientProtocolException e){
+    		e.printStackTrace();
+    	} catch (IOException e){
+    		e.printStackTrace();
+    	}
+    	return builder.toString();
+    }
+    
+  //helper method to PUT the JSON object
+    public String putJSON(String urlStr, String putStr, int revID) throws Exception{ 
+    	HttpClient httpClient = new DefaultHttpClient();
+        HttpResponse response;
+        HttpPut put=new HttpPut();
+        HttpEntity httpEntity;
+        StringEntity stringEntity=new StringEntity(putStr);
+        stringEntity.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+        httpEntity=stringEntity;
+        put.setEntity(httpEntity);
+        put.setURI(new URI(urlStr));
+        put.setHeader("Content-type", "application/json");
+        response=httpClient.execute(put);
+        return parseHttpResponse(response,revID);          
+     }
+    
+    public String postJSON(String urlStr, String postStr) throws Exception{ 
+    	HttpClient httpClient = new DefaultHttpClient();
+        HttpResponse response;
+        HttpPost post=new HttpPost();
+        HttpEntity httpEntity;
+        StringEntity stringEntity=new StringEntity(postStr);
+        httpEntity=stringEntity;
+        post.setEntity(httpEntity);
+        post.setURI(new URI(urlStr));
+        post.setHeader("Accept", "application/json");
+        post.setHeader("Content-type", "application/json");
+        response=httpClient.execute(post);
+       
+        return parseHttpResponse(response, 2);          
+     }
+    
+    public  String parseHttpResponse(HttpResponse response,int revID) throws Exception {
+        int status = response.getStatusLine().getStatusCode();
+        String jsonString = EntityUtils.toString(response.getEntity());     
+        JSONObject result = new JSONObject(jsonString); //Convert String to JSON Object
+        if(revID == 1){
+        	if(result.has("rev"))
+        		return result.getString("rev"); //return new rev  
+        }
+        else if(revID == 0){
+        	return result.getString("id");
+        }
+        return result.toString();
+        
+    }
+	//helper AsyncTask class
+	private class fetchJSON extends AsyncTask<String, Integer, String> {
+        @Override
+		protected String doInBackground(String... id) {
+        	String convoJSON = getJSON(id[0]);
+            return convoJSON;
+        } 
+        @Override
+        protected void onPostExecute(String result) {
+        	
+        }
+    }
+	
+	private String getRandUser(String thisUser, ArrayList<String> strArr){
+		Random rand = new Random();
+	    int randomNum = rand.nextInt(strArr.size());
+	    String randId = strArr.get(randomNum);
+	    if(randId.equals(thisUser)){
+	    	getRandUser(thisUser,strArr);
+	    }
+	    return randId;
+	}
+	
+	public String getCurrentConvoUpdates(String convoID){
+		return(getJSON(update_all_convos_str+convoID));
+		//should handle updating conversation, probably should actualyl return convo object
+		//should be running in the specific conversatin
+	}
+	
+	public static String getUpdates(String user_id){
+		//curl -X GET "http://104.236.22.60:5984/shyhi/_changes?feed=continuous&filter=users_convo/important&name=a02b5b9b-05a0-4c0c-b946-83e1f28ac2f6"
+		Log.i("JSON update",getJSON(update_all_convos_str+user_id));
+		return "";
+		//should handle updating all convos in the background. Maybe not continuous but polling. Like every 30 sec or min
+		//should be always running
+	}
+}

@@ -29,8 +29,8 @@ public class HomeScreen extends ActionBarActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_home_screen);
 		Installation installation = new Installation();
-		installation.id(getApplicationContext());
-		Log.i("USER ID",installation.getUUID());
+		Installation.id(getApplicationContext());
+		Log.i("USER ID",Installation.getUUID());
 		logo = (ImageView)findViewById(R.id.imageView1);
 		description = (TextView)findViewById(R.id.textView1);
 		newChat = (Button)findViewById(R.id.button1);	
@@ -38,7 +38,7 @@ public class HomeScreen extends ActionBarActivity {
 		
 		progress = new ProgressDialog(this);
 		
-		
+	
 		fadeInImage(logo); 	//Call fade in animation for logo
 		
 		newChat.setOnClickListener( new OnClickListener() {		//Called if button clicked
@@ -59,6 +59,7 @@ public class HomeScreen extends ActionBarActivity {
             	startActivity(nextActivity); 										//Starts next activity
             }
         });
+		
 	}
 
 	@Override

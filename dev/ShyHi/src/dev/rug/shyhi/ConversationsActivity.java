@@ -2,8 +2,12 @@ package dev.rug.shyhi;
 
 import java.util.ArrayList;
 
+import dev.rug.shyhi.ConvoActivity.ResponseReceiver;
 import android.support.v7.app.ActionBarActivity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,22 +29,33 @@ public class ConversationsActivity extends ActionBarActivity {
 	
 	private ArrayList<Convo> convos;
 	private CustomConvoAdapter adapter;
-	private Installation installation = new Installation();
+    private ConvosResponseReceiver receiver = new ConvosResponseReceiver();
 
-	private String userID = installation.getUUID();
+	private String userID = Installation.getUUID();
 	RestUtils restUtil = new RestUtils(); 
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.i("User id is:",userID);
-
+		Intent intent = getIntent();
+		if(intent.hasExtra("idExtra")){
+			userID = intent.getStringExtra("idExtra");
+		}
 		setContentView(R.layout.activity_conversations);
+		updateConvos();
+		
+		IntentFilter filter = new IntentFilter(ConvosResponseReceiver.ACTION_RESP);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        registerReceiver(receiver, filter);
+        
+	}
+	public void updateConvos(){
 		convos = restUtil.getAllConvos(userID);
 		// pass context and data to the custom adapter
 	    adapter = new CustomConvoAdapter(this, convos);
 		ListView lv = (ListView)findViewById(R.id.shysList);	
 	    //setListAdapter
+		lv.setAdapter(null);
 	    lv.setAdapter(adapter);
 	    lv.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view,int position, long id) {
@@ -51,13 +66,15 @@ public class ConversationsActivity extends ActionBarActivity {
 				startActivity(intent);
 			}
 		});
+		String userID = Installation.getUUID();
+		Intent intent = new Intent(this, UpdaterService.class);
+		intent.putExtra(UpdaterService.IN_EXTRA, userID);
+		startService(intent);
 	}
 	@Override
 	protected void onResume(){
 		super.onResume();
-		convos = restUtil.getAllConvos(userID);
-
-		adapter.notifyDataSetChanged();
+		//updateConvos();
 	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -77,5 +94,16 @@ public class ConversationsActivity extends ActionBarActivity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	
+	public class ConvosResponseReceiver extends BroadcastReceiver {
+		   public static final String ACTION_RESP =    
+		      "dev.rug.intent.action.MESSAGES_CHECKED";   
+		   @Override
+		    public void onReceive(Context context, Intent intent) {
+			   if(intent.getBooleanExtra(UpdaterService.OUT_EXTRA, false)){
+				   updateConvos();
+			   }
+			   		    }
+		}
 	
 }

@@ -3,9 +3,15 @@ package dev.rug.shyhi;
 import java.util.ArrayList;
 
 import android.support.v7.app.ActionBarActivity;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,30 +21,30 @@ import android.widget.ListView;
 
 public class ConvoActivity extends ActionBarActivity {
 
+	ConvoUpdateService mService;
+	boolean mBound = false;
 	private Installation installation = new Installation();
-	public String restUrl = "http://104.236.22.60:5984/shyhi/_design/conversation/_view/get_convo?key=";
+	private String restUrl = RestUtils.get_convo_view_str;
 	RestUtils restUtil = new RestUtils();
 	private Convo convo;
-	private String userID = installation.getUUID();
+	public String convoID;
+	private String userID = Installation.getUUID();
 	private ArrayList<Message> messages;
 	private convoAdapter adapter = null;
+    private ResponseReceiver receiver;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_conversation);
 		//get convo id, which will be passed as an intent extra
 		Intent intent = getIntent();
-		String intentID = intent.getStringExtra("idExtra");
-		convo = restUtil.getConvoById(intentID);
-		if(convo.hasMessages())
-			messages = convo.getMessages();
-		else
-			messages = new ArrayList<Message>();
-		// pass context and data to the custom adapter
-	    adapter = new convoAdapter(this, messages);
-		ListView lv = (ListView)findViewById(R.id.msgsLv);	
-	    //setListAdapter
-	    lv.setAdapter(adapter);
+		convoID = intent.getStringExtra("idExtra");		
+		IntentFilter filter = new IntentFilter(ResponseReceiver.ACTION_RESP);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        receiver = new ResponseReceiver();
+        registerReceiver(receiver, filter);
+		updateListener(convoID);
 	}
 
 	@Override
@@ -46,6 +52,10 @@ public class ConvoActivity extends ActionBarActivity {
 		super.onResume();
 		
 		adapter.notifyDataSetChanged();
+	}
+	protected void onPause(){
+		super.onPause();
+        unregisterReceiver(receiver);
 	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -79,7 +89,7 @@ public class ConvoActivity extends ActionBarActivity {
 		String convoStr = convo.toStringForPut();
 		try {
 			String idStr = convo.getId().substring(1,convo.getId().length()-1);
-			String putUrl = "http://104.236.22.60:5984/shyhi/"+idStr;
+			String putUrl = getString(R.string.dev_server)+idStr;
 			new putJSONAsync().execute(putUrl,convoStr);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -118,4 +128,37 @@ public class ConvoActivity extends ActionBarActivity {
 	            return null;
 	    }
 	}
+	public void updateMessages(String convo_id){
+
+		convo = restUtil.getConvoById(convo_id);
+		if(convo.hasMessages())
+			messages = convo.getMessages();
+		else
+			messages = new ArrayList<Message>();
+		// pass context and data to the custom adapter
+	    adapter = new convoAdapter(this, messages);
+		ListView lv = (ListView)findViewById(R.id.msgsLv);	
+	    //setListAdapter
+	    lv.setAdapter(adapter);
+	}
+	public void updateListener(String convo_id){
+		Intent intent = new Intent(this, ConvoUpdateService.class);
+		intent.putExtra(ConvoUpdateService.IN_EXTRA, convo_id);
+		startService(intent);
+		updateMessages(convo_id);
+	}
+	
+	public class ResponseReceiver extends BroadcastReceiver {
+		   public static final String ACTION_RESP =    
+		      "dev.rug.intent.action.MESSAGE_PROCESSED";   
+		   @Override
+		    public void onReceive(Context context, Intent intent) {
+			   if(intent.getBooleanExtra(ConvoUpdateService.OUT_EXTRA, false)){
+				   Log.i("Reciever", "Update");
+				   updateMessages(convoID);
+			   }
+			   else
+			   updateListener(convoID);
+		    }
+		}
 }

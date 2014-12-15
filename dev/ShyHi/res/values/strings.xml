@@ -10,5 +10,8 @@
     <string name="title_activity_conversation">Conversation</string>
     <string name="title_activity_list__item">List_Item</string>
     <string name="title_activity_progress_page">Progress Page</string>
-    
+    <string name="dev_server">http://104.236.22.60:5984/shyhi/</string>
+	<string name="get_convo_view_str">http://104.236.22.60:5984/shyhi/_design/conversation/_view/get_convo?key=</string> 
+	<string name="get_all_convo_view_str">http://104.236.22.60:5984/shyhi/_design/conversation/_view/get_all_convo?key=</string> 
+	<string name="get_all_user_ids">http://104.236.22.60:5984/shyhi/_design/conversation/_view/getAllUserIds</string>
 </resources>

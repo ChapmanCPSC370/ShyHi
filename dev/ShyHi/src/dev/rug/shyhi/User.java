@@ -47,7 +47,6 @@ public class User {
 	}
 	public String getUserForPost(){
 		String userStr = "{"+"\"_id\":"+getID()+","+
-			"\"_rev\":"+getRev()+","+
 			"\"type\":"+"\"user\","+
 			"\"latitude\":"+getLat()+","+
 			"\"longitude\":"+getLong()+"}";

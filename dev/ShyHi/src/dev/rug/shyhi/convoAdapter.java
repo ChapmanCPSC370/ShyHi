@@ -12,7 +12,8 @@ import android.widget.TextView;
 public class convoAdapter extends ArrayAdapter<Message>{
 
 	private final Context context;
-    //arraylist of films
+	Installation installation = new Installation();
+	private String userID = installation.getUUID();
     private ArrayList<Message> itemsArrayList;
     public convoAdapter(Context context, ArrayList<Message> itemsArrayList) {
         super(context, R.layout.list_item, itemsArrayList);
@@ -26,12 +27,28 @@ public class convoAdapter extends ArrayAdapter<Message>{
 		LayoutInflater inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		//init row view
-		View rowView = inflater.inflate(R.layout.list_item, parent, false);
-		//get and set layout elements
-		TextView msgText = (TextView) rowView.findViewById(R.id.recentMsg);
+		String messageFrom = itemsArrayList.get(position).getFromID().substring(1, itemsArrayList.get(position).getFromID().length()-1);
+		if(messageFrom.equals(userID)){
+			
+			View rowView = inflater.inflate(R.layout.left_message, parent, false);
+			//get and set layout elements
+			TextView msgText = (TextView) rowView.findViewById(R.id.recentMsg);
+			
+			//set the textviews by accessing coznvo object
+			msgText.setText((itemsArrayList.get(position).getMessageNoQuotes()));
+				return rowView;
+		}
+		else{
+			
+			View rowView = inflater.inflate(R.layout.right_message, parent, false);
+			//get and set layout elements
+			TextView msgText = (TextView) rowView.findViewById(R.id.recentMsg);
+			
+			//set the textviews by accessing convo object
+			msgText.setText((itemsArrayList.get(position).getMessageNoQuotes()));
+				return rowView;
+		}
+			
 		
-		//set the textviews by accessing convo object
-		msgText.setText((itemsArrayList.get(position).getMessage()));
-			return rowView;
 	}
 }

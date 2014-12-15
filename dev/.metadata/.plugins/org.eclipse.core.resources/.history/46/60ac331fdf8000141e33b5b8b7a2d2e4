@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" 
+    android:background="#000000" >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:layout_width="320dp"
+                android:layout_height="30sp"
+                android:orientation="horizontal"
+                android:
+                >
+
+                <TextView
+                    android:id="@+id/textView1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="Anon#"
+                    android:textSize = "18sp" 
+                    android:paddingLeft="10sp" 
+                    android:paddingTop = "5sp"
+                    android:textColor="#FFFFFF"/>
+
+                <ImageView
+                    android:id="@+id/imageView1"
+                    android:layout_width="25sp"
+                    android:layout_height="match_parent"
+                    android:paddingLeft="10sp"
+                    android:layout_gravity="center"/>
+	                   <!-- android:src="@drawable/online"   --> 
+                
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="7:34PM" 
+                    android:paddingLeft="160sp"
+                    android:gravity="right"
+                    android:textColor="#FFFFFF"
+                    android:paddingTop = "5sp"
+                    android:textSize="15sp"
+                    />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hi! How's it going?"
+                android:paddingLeft="10sp"
+                android:textColor="#FFFFFF" 
+                android:paddingBottom="5sp" />
+        </LinearLayout>
+</LinearLayout>
