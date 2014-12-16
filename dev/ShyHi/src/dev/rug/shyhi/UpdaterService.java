@@ -20,6 +20,8 @@ public class UpdaterService extends IntentService {
 	RestUtils restUtils = new RestUtils();
 	public static final String IN_EXTRA = "userIdExtra";
 	public static final String OUT_EXTRA = "bool_extra";
+	public static final String NOTIFY_EXTRA = "notifyExtra";
+	public static boolean SELF_NOTIFY = false;
 	NotificationManager mNotifyMgr;
 
 	public UpdaterService(String name) {
@@ -38,7 +40,9 @@ public class UpdaterService extends IntentService {
 			  if(!j.getString("results").equals("[]")) {
 				  Intent mIntent = new Intent(this,ConversationsActivity.class);
 				  mIntent.putExtra("idExtra",userID);
-				  startNotification("",mIntent);
+				  if(!SELF_NOTIFY){
+					  startNotification("",mIntent);
+				  }
 				  updateBool = true;
 			  }
 			  Installation.SEQ_ID = j.getString("last_seq");
@@ -67,7 +71,7 @@ public class UpdaterService extends IntentService {
 				    .setContentTitle("New Shy Message!");
 		  mBuilder.setContentIntent(resultPendingIntent);
 		  
-		  
+		  mBuilder.setAutoCancel(true);
 		// Sets an ID for the notification
 		  int mNotificationId = 001;
 		  // Gets an instance of the NotificationManager service
@@ -86,9 +90,8 @@ public class UpdaterService extends IntentService {
 	    long nextUpdateTimeMillis = currentTimeMillis + 5000; // DateUtils.MINUTE_IN_MILLIS;
 	    Time nextUpdateTime = new Time();
 	    nextUpdateTime.set(nextUpdateTimeMillis);
-
+	    SELF_NOTIFY = false;
 	    AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 	    alarmManager.set(AlarmManager.RTC, nextUpdateTimeMillis, pendingIntent);
-	    //Log.i("Update Alarm","scheduled");
 	    }
 }

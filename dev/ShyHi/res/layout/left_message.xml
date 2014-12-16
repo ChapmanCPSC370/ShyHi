@@ -11,7 +11,7 @@
 	        android:layout_marginLeft="15dp"
 	        android:layout_marginRight="15dp"
 	        android:layout_marginTop="15dp"
-	        android:background="@drawable/skybluenew"
+	        android:background="@drawable/lightgray"
 	        android:clipToPadding="true"
 	        android:focusable="true"
 	        android:gravity="left"

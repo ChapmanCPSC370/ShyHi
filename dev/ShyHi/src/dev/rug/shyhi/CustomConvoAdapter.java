@@ -103,13 +103,10 @@ public class CustomConvoAdapter extends BaseAdapter implements OnClickListener{
     		Installation installation = new Installation();
     		String thisUser = installation.getUUID();
             //Sets model values
-            holder.anonNumber.setText(tempValues.getOtherUser(thisUser).substring(1, tempValues.getOtherUser(thisUser).length()-1));	//Is this the anon#? 
+    		holder.anonNumber.setText(randomNameGen.randomName());
+            //holder.anonNumber.setText(tempValues.getOtherUser(thisUser).substring(1, tempValues.getOtherUser(thisUser).length()-1));	//Is this the anon#? 
             holder.convoText.setText(tempValues.getMostRecentMessage());
             holder.textDate.setText(tempValues.getMostRecentTime());
-           // holder.onlineStatus.setImageResource(
-            		//res.getIdentifier(
-            				//"dev.rug.shyhi:drawable/online"
-            				//,null,null));
         }
         return vi;
     }

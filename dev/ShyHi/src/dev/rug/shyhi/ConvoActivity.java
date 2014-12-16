@@ -108,6 +108,7 @@ public class ConvoActivity extends ActionBarActivity {
 	public void sendMessage(View v){
 		EditText messageET = (EditText) findViewById(R.id.newmsg);
 		if(!messageET.getText().toString().equals("")){
+			UpdaterService.SELF_NOTIFY = true;
 			String newMsg = "\""+messageET.getText().toString()+"\"";
 			putMessage(newMsg);
 			adapter.notifyDataSetChanged();

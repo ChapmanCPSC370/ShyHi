@@ -1,0 +1,8 @@
+package dev.rug.shyhi;
+
+import java.util.ArrayList;
+
+public class randomNameGen {
+	ArrayList<String> adjArr= {"numerous","flagrant","wild","comfortable","incandescent","rare","pushy","insidious","workable","dirty","doubtful","cruel","friendly","productive","busy","tough","thinkable","repulsive","colorful","excellent","succinct","honorable","aggressive","flawless","narrow"};
+	
+}	

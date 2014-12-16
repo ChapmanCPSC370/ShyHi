@@ -30,7 +30,7 @@ public class convoAdapter extends ArrayAdapter<Message>{
 		String messageFrom = itemsArrayList.get(position).getFromID().substring(1, itemsArrayList.get(position).getFromID().length()-1);
 		if(messageFrom.equals(userID)){
 			
-			View rowView = inflater.inflate(R.layout.left_message, parent, false);
+			View rowView = inflater.inflate(R.layout.right_message, parent, false);
 			//get and set layout elements
 			TextView msgText = (TextView) rowView.findViewById(R.id.recentMsg);
 			
@@ -40,7 +40,7 @@ public class convoAdapter extends ArrayAdapter<Message>{
 		}
 		else{
 			
-			View rowView = inflater.inflate(R.layout.right_message, parent, false);
+			View rowView = inflater.inflate(R.layout.left_message, parent, false);
 			//get and set layout elements
 			TextView msgText = (TextView) rowView.findViewById(R.id.recentMsg);
 			
